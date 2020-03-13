@@ -30,7 +30,7 @@ pipeline {
                         openshift.withProject {
                             env.TAG= readMavenPom().getVersion()
                             openshift.selector("bc","hello-openshift").startBuild("--from-dir=./target","--wait=true")
-                            openshift.tag("hello-dev/hello-openshift:latest", "hello-openshift:${env.TAG}")
+                            openshift.tag("hello-openshift/hello-openshift:latest", "hello-openshift:${env.TAG}")
                         }
 
                     }
