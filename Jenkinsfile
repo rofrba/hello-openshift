@@ -38,13 +38,16 @@ pipeline {
         }
         stage('Deploy Image') {
             steps {
-                openshift.withCluster {
+                script {
+                    openshift.withCluster {
                     openshift.withProject("hello-openshift") {
                         openshift.set("triggers", "dc/hello-openshift", "--remove-all")
                         openshift.set("triggers", "dc/hello-openshift", "--from-image=hello-openshift:latest", "-c hello-openshift")
                         openshift.selector("dc", "hello-openshift").rollout().status()
                     }
                 }
+                }
+                
             }
 
         }
