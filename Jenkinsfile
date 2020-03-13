@@ -1,17 +1,29 @@
 pipeline {
-          agent maven
-          stages { 
-           stage('Compile') {
+    agent {
+        label "maven"
+    }
+    options { 
+        skipDefaultCheckout()
+        disableConcurrentBuilds()
+    }
+    stages {
+        stage("Checkout") {
+            steps {
+                checkout(scm)   
+            }
+        }
+
+        stage('Compile') {
             steps {
                 sh "mvn package -DskipTests"
             }
-           }
-           stage('Test') {
+       }
+        stage('Test') {
             steps {
                 sh "mvn test"
             }
-           }
-           stage('Build Image') {
+        }
+       stage('Build Image') {
             steps {
                 script {
                     openshift.withCluster {
@@ -24,5 +36,5 @@ pipeline {
                 }
             }
            }
-         }
-        }
+    }
+}
