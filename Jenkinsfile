@@ -1,9 +1,27 @@
 pipeline {
-          agent any
+          agent maven
           stages { 
-           stage('Hello') {
+           stage('Compile') {
             steps {
-                echo 'Hello World'
+                sh "mvn package -DskipTests"
+            }
+           }
+           stage('Test') {
+            steps {
+                sh "mvn test"
+            }
+           }
+           stage('Build Image') {
+            steps {
+                script {
+                    openshift.withCluster {
+                        openshift.withProject {
+                            env.TAG= readMavenPom().getVersion()
+                            openshift.selector("bc","hello-openshift").startBuild("--from-dir=./target","--wait=true")
+                        }
+
+                    }
+                }
             }
            }
          }
