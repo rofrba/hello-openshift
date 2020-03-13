@@ -55,7 +55,7 @@ pipeline {
 
         stage('Promote Stage'){
             steps {
-                imput("Promote to Stage?") {
+                input("Promote to Stage?") {
                     script {
                     openshift.withCluster {
                     openshift.withProject("hello-openshift") {
