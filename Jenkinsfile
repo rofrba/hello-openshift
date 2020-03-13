@@ -30,6 +30,7 @@ pipeline {
                         openshift.withProject {
                             env.TAG= readMavenPom().getVersion()
                             openshift.selector("bc","hello-openshift").startBuild("--from-dir=./target","--wait=true")
+                            openshift.tag("hello-dev/hello-openshift:latest", "hello-openshift:${env.TAG}")
                         }
 
                     }
@@ -40,14 +41,46 @@ pipeline {
             steps {
                 script {
                     openshift.withCluster {
-                    openshift.withProject("hello-openshift") {
-                        openshift.set("triggers", "dc/hello-openshift", "--remove-all")
-                        openshift.set("triggers", "dc/hello-openshift", "--from-image=hello-openshift:latest", "-c hello-openshift")
-                        openshift.selector("dc", "hello-openshift").rollout().status()
+                        openshift.withProject("hello-openshift") {
+                            openshift.set("triggers", "dc/hello-openshift", "--remove-all")
+                            openshift.set("triggers", "dc/hello-openshift", "--from-image=hello-openshift:latest", "-c hello-openshift")
+                            openshift.selector("dc", "hello-openshift").rollout().status()
+                        }
                     }
                 }
+                
+            }
+
+        }
+
+        stage('Promote Stage'){
+            steps {
+                imput("Promote to Stage?") {
+                    script {
+                    openshift.withCluster {
+                    openshift.withProject("hello-openshift") {
+                        openshift.tag("hello-openshift:${ENV.TAG}", "hello-openshift-stage/hello-openshift:${ENV.TAG}")
+                        }
+                    }
                 }
                 
+
+                }
+            }
+        }
+
+        stage('Deploy STAGE'){
+            steps{
+                script{
+                    openshift.withCluster {
+                        openshift.withProject('hello-openshift-stage') {
+                            openshift.set("triggers", "dc/hello-openshift", "--remove-all")
+                            openshift.set("triggers", "dc/hello-openshift", "--from-image=hello-openshift:latest", "-c hello-openshift")
+                            openshift.selector("dc", "hello-openshift").rollout().status()
+                        }
+                    }
+
+                }
             }
 
         }
