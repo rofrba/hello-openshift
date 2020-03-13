@@ -55,16 +55,13 @@ pipeline {
 
         stage('Promote Stage'){
             steps {
-                input("Promote to Stage?") {
-                    script {
-                    openshift.withCluster {
-                    openshift.withProject("hello-openshift") {
-                        openshift.tag("hello-openshift:${ENV.TAG}", "hello-openshift-stage/hello-openshift:${ENV.TAG}")
+                input("Promote to Stage?")
+                script {
+                        openshift.withCluster {
+                        openshift.withProject("hello-openshift") {
+                            openshift.tag("hello-openshift:${env.TAG}", "hello-openshift-stage/hello-openshift:${env.TAG}")
+                            }
                         }
-                    }
-                }
-                
-
                 }
             }
         }
